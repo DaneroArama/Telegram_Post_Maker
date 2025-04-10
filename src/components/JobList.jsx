@@ -25,17 +25,17 @@ function JobList({ jobs, type }) {
     case 'new':
       title = 'New Jobs'
       icon = '✅'
-      bgColor = 'bg-green-50'
+      bgColor = 'bg-green-100'
       break
     case 'same':
       title = 'Same Jobs'
       icon = '🔁'
-      bgColor = 'bg-gray-50'
+      bgColor = 'bg-gray-100'
       break
     case 'expired':
       title = 'Expired Jobs'
       icon = '❌'
-      bgColor = 'bg-red-50'
+      bgColor = 'bg-red-100'
       break
     default:
       title = 'Jobs'
