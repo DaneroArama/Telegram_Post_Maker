@@ -2,25 +2,27 @@
 
 // Predefined categories in the desired order
 export const categories = [
-  'Accounting | Auditing | Finance',
+  'Accounting, Auditing & Finance',
   'Administrative',
-  'Sales | Business Development | Management',
-  'Creative | Media | Design',
-  'Customer Service',
-  'Healthcare | Pharmacy',
-  'Human Resources | Recruitment',
+  'Architecture',
+  'Business Development & Management',
+  'Creative, Media & Design',
+  'Customer Service & Support',
+  'Distribution & Warehousing',
+  'Engineering & Technical',
+  'Farming & Livestocking',
+  'Food Services & Catering',
+  'Healthcare & Pharmacy',
+  'Hospitality & Leisure, Tourism',
+  'Human Resources & Recruitment',
   'Information Technology',
-  'Logistics | Supply Chain | Procurement',
-  'Marketing | PR | Communications',
-  'Project | Product Management',
-  'Planning | Operation | Production',
-  'Legal | Compliance',
-  'Research | Teaching | Training',
-  'Distribution | Warehousing',
-  'Driver & Transport Service',
-  'Hospitality | Leisure | Tourism',
-  'Engineering | Technical',
-  'Community & Social Services'
+  'Legal & Compliance',
+  'Logistics, Supply Chain & Procurement',
+  'Marketing, PR & Communications',
+  'Planning & Operations',
+  'Project & Product Management',
+  'Quality Control & Assurance',
+  'Translation'
 ]
 
 // Generate unique key for each job
@@ -42,11 +44,11 @@ export const groupJobsByCategory = (jobs) => {
     
     // Special case for Project & Product Management
     if (area === 'Project & Product Management') {
-      matchingCategory = 'Project | Product Management'
+      matchingCategory = 'Project & Product Management'
     } else {
       for (const category of categories) {
-        const areaParts = area.toLowerCase().split(/[|&]/).map(part => part.trim())
-        const categoryParts = category.toLowerCase().split(/[|&]/).map(part => part.trim())
+        const areaParts = area.toLowerCase().split(/[|&,]/).map(part => part.trim())
+        const categoryParts = category.toLowerCase().split(/[|&,]/).map(part => part.trim())
         
         const hasMatch = areaParts.some(areaPart => 
           categoryParts.some(catPart => 
