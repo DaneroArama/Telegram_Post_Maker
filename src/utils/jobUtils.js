@@ -22,6 +22,7 @@ export const categories = [
   'Planning & Operations',
   'Project & Product Management',
   'Quality Control & Assurance',
+  'Research, Teaching & Training'
   'Translation'
 ]
 
