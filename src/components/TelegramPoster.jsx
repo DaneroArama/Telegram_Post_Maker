@@ -48,7 +48,8 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       setIsPosting(true);
       setPostStatus('Posting to Telegram...');
 
-      const response = await fetch('https://telegrampostmaker-production.up.railway.app/', {
+      // Use the correct API endpoint
+      const response = await fetch('https://telegrampostmaker-production.up.railway.app/api/post-to-telegram', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,6 +61,11 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
         }),
       });
 
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
       const result = await response.json();
 
       if (result.success) {
@@ -68,6 +74,7 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
         setPostStatus(`Failed to post: ${result.error}`);
       }
     } catch (error) {
+      console.error('Telegram posting error:', error);
       setPostStatus(`Error: ${error.message}`);
     } finally {
       setIsPosting(false);
@@ -121,7 +128,7 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
     footerContent += `Up to Date အလုပ်အကိုင်များကြည့်ရှုဖို Register ပြုလုပ်ရန် > https://www.myjobs.com.mm/register\n\n`;
     footerContent += `MyJobs Myanmar - Telegram Channel https://t.me/myjobsmyanmartelegram\n\n`;
     footerContent += `MyJobs Myanmar - Viber Community Group https://shorturl.at/efhrI\n\n`;
-    footerContent += `𝗨𝗻𝗹𝗼𝗰𝗸𝗶𝗻𝗴 𝗣𝗼𝘁𝗲𝗻𝘁𝗶𝗮𝗹, 𝗘𝗺𝗽𝗼𝘄𝗲𝗿𝗶𝗻𝗴 𝗚𝗿𝗼𝘄𝘁𝗵`;
+    footerContent += `𝗨𝗻𝗹𝗼𝗰𝗸𝗶𝗻𝗴 𝗣𝗼𝘁𝗲𝗻𝘁𝗶𝗲𝗹𝘀 𝗞𝘀𝘁𝘀`;
     
     // Combine all content
     return headerContent + categoriesContent + footerContent;
