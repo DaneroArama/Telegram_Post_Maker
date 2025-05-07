@@ -48,7 +48,7 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       setIsPosting(true);
       setPostStatus('Posting to Telegram...');
 
-      const response = await fetch('http://localhost:3001/api/post-to-telegram', {
+      const response = await fetch('https://telegrampostmaker-production.up.railway.app/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
