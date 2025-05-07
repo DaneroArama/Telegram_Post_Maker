@@ -6,6 +6,7 @@ import './App.css'
 import FileUpload from './components/FileUpload'
 import JobList from './components/JobList'
 import CategoryTabs from './components/CategoryTabs'
+import TelegramPoster from './components/TelegramPoster'
 
 // Import utilities and services
 import { categories, getJobKey, parseExcelFile, groupJobsByCategory } from './utils/jobUtils'
@@ -188,13 +189,26 @@ function App() {
                 const groupedJobs = groupJobsByCategory(allNewFileJobs)
                 
                 return (
-                  <CategoryTabs 
-                    categories={categories}
-                    groupedJobs={groupedJobs}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    onCopyCategory={copyDetailedListingsForCategory}
-                  />
+                  <>
+                    <CategoryTabs 
+                      categories={categories}
+                      groupedJobs={groupedJobs}
+                      activeTab={activeTab}
+                      setActiveTab={setActiveTab}
+                      onCopyCategory={copyDetailedListingsForCategory}
+                    />
+                    
+                    {/* Add TelegramPoster for active category */}
+                    {activeTab && (
+                      <div className="mt-4">
+                        <TelegramPoster 
+                          generatedText={generateTelegramText(result)} 
+                          result={result}
+                          generateDetailedJobListingsForCategory={generateDetailedJobListingsForCategory}
+                        />
+                      </div>
+                    )}
+                  </>
                 )
               })()}
             </div>
