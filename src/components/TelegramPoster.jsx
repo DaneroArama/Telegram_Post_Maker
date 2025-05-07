@@ -296,7 +296,12 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       throw new Error('Message and channelId are required');
     }
     
-    const response = await fetch('http://localhost:3001/api/post-to-telegram', {
+    // Use environment-based API URL
+    const apiBaseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://telegrampostmaker-production.up.railway.app'
+      : 'http://localhost:3001';
+    
+    const response = await fetch(`${apiBaseUrl}/api/post-to-telegram`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
