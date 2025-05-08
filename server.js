@@ -24,10 +24,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist')));
 }
 
-// Add a root endpoint for health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'Telegram Post Maker API is running' });
-});
+// Health check endpoint removed
 
 // Route to post to Telegram
 app.post('/api/post-to-telegram', async (req, res) => {
