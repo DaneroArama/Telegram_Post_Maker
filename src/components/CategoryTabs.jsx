@@ -1,11 +1,16 @@
 import React from 'react'
 import JobCard from './JobCard'
 
-function CategoryTabs({ categories, groupedJobs, activeTab, setActiveTab, onCopyCategory }) {
+function CategoryTabs({ categories, groupedJobs, activeTab, setActiveTab, onCopyCategory, newJobs = [] }) {
   // Filter categories that have jobs
   const categoriesWithJobs = categories.filter(cat => 
     groupedJobs.has(cat) && groupedJobs.get(cat).length > 0
   )
+
+  // Helper function to check if a job is new
+  const isJobNew = (job) => {
+    return newJobs.some(newJob => newJob['ID'] === job['ID'])
+  }
 
   return (
     <div>
@@ -40,7 +45,7 @@ function CategoryTabs({ categories, groupedJobs, activeTab, setActiveTab, onCopy
           </div>
         )}
         {activeTab && groupedJobs.get(activeTab)?.map(job => (
-          <JobCard key={job['ID']} job={job} />
+          <JobCard key={job['ID']} job={job} isNew={isJobNew(job)} />
         ))}
       </div>
     </div>

@@ -48,15 +48,19 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       setIsPosting(true);
       setPostStatus('Posting to Telegram...');
 
-      // Use the correct API endpoint with the /api/post-to-telegram path
+      // Updated API URL configuration for Railway
       const apiUrl = process.env.NODE_ENV === 'production' 
         ? 'https://telegrampostmaker-production.up.railway.app/api/post-to-telegram'
         : 'http://localhost:3001/api/post-to-telegram';
+      
+      // Add console log for debugging
+      console.log(`Using API URL: ${apiUrl}`);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           message: generatedText,
@@ -65,8 +69,13 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
         }),
       });
 
+      // Log response status for debugging
+      console.log(`Response status: ${response.status}`);
+
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response: ${errorText}`);
         throw new Error(`Server responded with status: ${response.status}`);
       }
 

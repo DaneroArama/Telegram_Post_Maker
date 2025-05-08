@@ -1,15 +1,18 @@
 import React from 'react'
 
-function JobCard({ job }) {
+function JobCard({ job, isNew }) {
   const title = job['Title'] || 'Untitled Position'
-  const company = job["Companies' Name"] || 'Unknown Company'
+  
+  // Handle different possible column names for company
+  const company = job["Companies' Name"]
+  
   // Make location optional and handle different possible column names
   const location = job['Location'] || 'Yangon, Myanmar'
   const jobId = job['ID']
   const urlTitle = title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')
   
   return (
-    <div className="mb-4 pb-4 border-b last:border-b-0">
+    <div className={`mb-4 pb-4 border-b last:border-b-0 ${isNew ? 'bg-green-100 p-2 rounded' : ''}`}>
       <div className="font-medium">{title}</div>
       <div>💼 {company}</div>
       <div>📍 {location}</div>

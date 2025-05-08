@@ -196,6 +196,7 @@ function App() {
                       activeTab={activeTab}
                       setActiveTab={setActiveTab}
                       onCopyCategory={copyDetailedListingsForCategory}
+                      newJobs={result.newJobs}
                     />
                     
                     {/* Add TelegramPoster for active category */}

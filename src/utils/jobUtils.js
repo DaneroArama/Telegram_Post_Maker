@@ -8,6 +8,7 @@ export const categories = [
   'Business Development & Management',
   'Creative, Media & Design',
   'Customer Service & Support',
+    'Community & Social Services',
   'Distribution & Warehousing',
   'Engineering & Technical',
   'Farming & Livestocking',
