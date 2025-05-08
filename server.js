@@ -159,7 +159,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Create server and handle port in use errors
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
