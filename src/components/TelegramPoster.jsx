@@ -312,30 +312,61 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       ? 'https://telegrampostmaker-production.up.railway.app'
       : 'http://localhost:3001';
     
-    const response = await fetch(`${apiBaseUrl}/api/post-to-telegram`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message,
-        channelId,
-        parseMode: 'Markdown' // Add parse mode
-      }),
-    });
+    // Try both the /api path and root path
+    const endpoints = [
+      `${apiBaseUrl}/api/post-to-telegram`,
+      `${apiBaseUrl}/post-to-telegram`,
+      `${apiBaseUrl}`
+    ];
     
-    // Check if response is ok before trying to parse JSON
-    if (!response.ok) {
-      throw new Error(`Server responded with status: ${response.status}`);
+    let lastError = null;
+    
+    // Try each endpoint until one works
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying endpoint: ${endpoint}`);
+        
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            message,
+            channelId,
+            parseMode: 'Markdown'
+          }),
+        });
+        
+        // Log response details for debugging
+        console.log(`Response from ${endpoint}:`, response.status);
+        
+        // Check if response is ok before trying to parse JSON
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Error from ${endpoint}:`, errorText);
+          lastError = new Error(`Server responded with status: ${response.status}`);
+          continue; // Try next endpoint
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+          lastError = new Error(result.error || 'Failed to post message');
+          continue; // Try next endpoint
+        }
+        
+        return result; // Success! Return the result
+      } catch (error) {
+        console.error(`Error with endpoint ${endpoint}:`, error);
+        lastError = error;
+        // Continue to next endpoint
+      }
     }
     
-    const result = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to post message');
-    }
-    
-    return result;
+    // If we get here, all endpoints failed
+    throw lastError || new Error('All API endpoints failed');
   };
   
   // Helper function to group jobs by category
