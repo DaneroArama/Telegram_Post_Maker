@@ -88,10 +88,10 @@ app.post('/api/post-to-telegram', async (req, res) => {
   }
 });
 
-// Add a root POST endpoint to handle direct posts
-app.post('/', async (req, res) => {
+// Add another endpoint for /post-to-telegram
+app.post('/post-to-telegram', async (req, res) => {
   try {
-    console.log('Received request to root endpoint');
+    console.log('Received request to /post-to-telegram');
     const { message, channelId, parseMode } = req.body;
     
     if (!message || !channelId) {
