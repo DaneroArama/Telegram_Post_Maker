@@ -48,10 +48,8 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       setIsPosting(true);
       setPostStatus('Posting to Telegram...');
 
-      // Updated API URL configuration for Railway
-      const apiUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://telegrampostmaker-production.up.railway.app/api/post-to-telegram'
-        : 'http://localhost:3001/api/post-to-telegram';
+      // Use relative URL path instead of absolute URL
+      const apiUrl = '/api/post-to-telegram';
       
       // Add console log for debugging
       console.log(`Using API URL: ${apiUrl}`);
