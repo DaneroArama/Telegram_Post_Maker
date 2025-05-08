@@ -48,8 +48,12 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       setIsPosting(true);
       setPostStatus('Posting to Telegram...');
 
-      // Use the correct API endpoint
-      const response = await fetch('https://telegrampostmaker-production.up.railway.app/', {
+      // Use the correct API endpoint with the /api/post-to-telegram path
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://telegrampostmaker-production.up.railway.app/api/post-to-telegram'
+        : 'http://localhost:3001/api/post-to-telegram';
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -303,7 +307,7 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       throw new Error('Message and channelId are required');
     }
     
-    // Use environment-based API URL
+    // Use environment-based API URL with the correct endpoint
     const apiBaseUrl = process.env.NODE_ENV === 'production' 
       ? 'https://telegrampostmaker-production.up.railway.app'
       : 'http://localhost:3001';
@@ -319,6 +323,11 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
         parseMode: 'Markdown' // Add parse mode
       }),
     });
+    
+    // Check if response is ok before trying to parse JSON
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
+    }
     
     const result = await response.json();
     
