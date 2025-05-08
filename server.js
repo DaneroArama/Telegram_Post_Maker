@@ -26,7 +26,15 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist')));
 }
 
-// Health check endpoint removed
+// Add a health check endpoint for Railway
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Add a root endpoint for basic connectivity check
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Telegram Post Maker API is running' });
+})
 
 // Route to post to Telegram
 app.post('/api/post-to-telegram', async (req, res) => {
@@ -160,4 +168,21 @@ const server = app.listen(PORT, () => {
   } else {
     console.error('Server error:', err);
   }
+});
+
+// Add graceful shutdown handlers
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
