@@ -9,7 +9,9 @@ import { fileURLToPath } from 'url';
 dotenv.config();
 
 const app = express();
+// Make sure we use the PORT from environment variable
 const PORT = process.env.PORT || 3001;
+console.log(`Using port: ${PORT}`);
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -143,11 +145,19 @@ app.post('/post-to-telegram', async (req, res) => {
 
 // Catch-all route to serve the React app in production
 if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
+  app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 }
 
-app.listen(PORT, () => {
+// Create server and handle port in use errors
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Please use a different port.`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', err);
+  }
 });
