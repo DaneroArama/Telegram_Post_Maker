@@ -48,13 +48,17 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       setIsPosting(true);
       setPostStatus('Posting to Telegram...');
 
-      // Use relative URL path instead of absolute URL
-      const apiUrl = '/api/post-to-telegram';
+      // Determine the base URL based on environment
+      const baseUrl = window.location.origin;
+      // Try both API endpoints
+      const apiUrl = `${baseUrl}/api/post-to-telegram`;
+      const fallbackApiUrl = `${baseUrl}/post-to-telegram`;
       
       // Add console log for debugging
-      console.log(`Using API URL: ${apiUrl}`);
+      console.log(`Using API URL: ${apiUrl} (with fallback to ${fallbackApiUrl})`);
       
-      const response = await fetch(apiUrl, {
+      // Prepare request options
+      const requestOptions = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,10 +69,19 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
           channelId: targetChannelId,
           parseMode: 'Markdown' // Explicitly set parse mode
         }),
-      });
-
-      // Log response status for debugging
-      console.log(`Response status: ${response.status}`);
+      };
+      
+      // Try the main API endpoint first
+      let response;
+      try {
+        response = await fetch(apiUrl, requestOptions);
+        console.log(`Main API response status: ${response.status}`);
+      } catch (mainApiError) {
+        console.error('Error with main API endpoint:', mainApiError);
+        console.log('Trying fallback API endpoint...');
+        response = await fetch(fallbackApiUrl, requestOptions);
+        console.log(`Fallback API response status: ${response.status}`);
+      }
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
@@ -314,17 +327,20 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       throw new Error('Message and channelId are required');
     }
     
-    // Use environment-based API URL with the correct endpoint
-    const apiBaseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://telegrampostmaker-production.up.railway.app'
-      : 'http://localhost:3001';
+    // Determine the base URL dynamically based on current location
+    const baseUrl = window.location.origin;
     
-    // Try both the /api path and root path
+    // Try multiple endpoint patterns
     const endpoints = [
-      `${apiBaseUrl}/api/post-to-telegram`,
-      `${apiBaseUrl}/post-to-telegram`,
-      `${apiBaseUrl}`
+      `${baseUrl}/api/post-to-telegram`,
+      `${baseUrl}/post-to-telegram`,
+      // Fallback to Railway URL if needed
+      'https://telegrampostmaker-production.up.railway.app/api/post-to-telegram',
+      'https://telegrampostmaker-production.up.railway.app/post-to-telegram'
     ];
+    
+    console.log('Current origin:', baseUrl);
+    console.log('Will try these endpoints:', endpoints);
     
     let lastError = null;
     
