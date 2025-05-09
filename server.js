@@ -19,8 +19,11 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Add a root endpoint for health check
-app.get('/', (req, res) => {
+// Serve static files from the 'dist' directory FIRST
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// API routes
+app.get('/api', (req, res) => {
   res.json({ status: 'Telegram Post Maker API is running' });
 });
 
@@ -129,9 +132,6 @@ app.post('/', async (req, res) => {
     });
   }
 });
-
-// Serve static files from the 'dist' directory
-app.use(express.static(path.join(__dirname, 'dist')));
 
 // Fallback: serve index.html for any non-API route
 app.get('*', (req, res) => {
