@@ -330,13 +330,10 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
     // Determine the base URL dynamically based on current location
     const baseUrl = window.location.origin;
     
-    // Try multiple endpoint patterns
+    // Simplified endpoint handling - try only the most likely endpoints
     const endpoints = [
       `${baseUrl}/api/post-to-telegram`,
-      `${baseUrl}/post-to-telegram`,
-      // Fallback to Railway URL if needed
-      'https://telegrampostmaker-production.up.railway.app/api/post-to-telegram',
-      'https://telegrampostmaker-production.up.railway.app/post-to-telegram'
+      `${baseUrl}/post-to-telegram`
     ];
     
     console.log('Current origin:', baseUrl);
@@ -389,7 +386,7 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
     }
     
     // If we get here, all endpoints failed
-    throw lastError || new Error('All API endpoints failed');
+    throw lastError || new Error('Failed to post message to Telegram');
   };
   
   // Helper function to group jobs by category
