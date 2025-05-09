@@ -2,44 +2,25 @@ import express from 'express';
 import axios from 'axios';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 // Initialize dotenv
 dotenv.config();
 
 const app = express();
-// Make sure we use the PORT from environment variable
 const PORT = process.env.PORT || 3001;
-console.log(`Using port: ${PORT}`);
-
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Global error handler:', err);
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error',
-    details: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
+// Add a root endpoint for health check
+app.get('/', (req, res) => {
+  res.json({ status: 'Telegram Post Maker API is running' });
 });
 
-// Serve static files from the 'dist' directory in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'dist')));
-}
-
-// Add another endpoint for /post-to-telegram
-app.post('/post-to-telegram', async (req, res) => {
+// Route to post to Telegram
+app.post('/api/post-to-telegram', async (req, res) => {
   try {
-    console.log('Received request to /post-to-telegram');
     const { message, channelId, parseMode } = req.body;
     
     if (!message || !channelId) {
@@ -50,10 +31,9 @@ app.post('/post-to-telegram', async (req, res) => {
     }
 
     // Get bot token from environment variable
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const botToken = process.env.TELEGRAM_BOT_TOKEN || '8173624776:AAHtvlHBD-6LD_MqZmcmJw9D2piMJwkg6lY';
     
     if (!botToken) {
-      console.error('Bot token not configured in environment variables');
       return res.status(500).json({ 
         success: false, 
         error: 'Bot token not configured' 
@@ -70,61 +50,80 @@ app.post('/post-to-telegram', async (req, res) => {
 
     if (response.data && response.data.ok) {
       console.log('Telegram API response:', response.data);
-      return res.json({
-        success: true,
-        message: 'Posted to Telegram successfully'
+      return res.json({ 
+        success: true, 
+        message: 'Posted to Telegram successfully' 
       });
     } else {
-      console.error('Failed Telegram response:', response.data);
-      return res.status(400).json({
-        success: false,
-        error: 'Failed to post to Telegram',
-        details: response.data
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Failed to post to Telegram', 
+        details: response.data 
       });
     }
   } catch (error) {
     console.error('Error posting to Telegram:', error.response?.data || error.message);
-    return res.status(500).json({
-      success: false,
-      error: 'Error posting to Telegram',
-      details: error.response?.data || error.message
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Error posting to Telegram', 
+      details: error.response?.data || error.message 
     });
   }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
+// Add a root POST endpoint to handle direct posts
+app.post('/', async (req, res) => {
+  try {
+    const { message, channelId, parseMode } = req.body;
+    
+    if (!message || !channelId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Message and channelId are required' 
+      });
+    }
 
-// Catch-all route to serve the React app in production
-if (process.env.NODE_ENV === 'production') {
-  app.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-  });
-}
+    // Get bot token from environment variable
+    const botToken = process.env.TELEGRAM_BOT_TOKEN || '8173624776:AAHtvlHBD-6LD_MqZmcmJw9D2piMJwkg6lY';
+    
+    if (!botToken) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Bot token not configured' 
+      });
+    }
 
-// Create server and handle port in use errors
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-}).on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Please use a different port.`);
-    process.exit(1);
-  } else {
-    console.error('Server error:', err);
+    // Send message to Telegram
+    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    const response = await axios.post(telegramUrl, {
+      chat_id: channelId,
+      text: message,
+      parse_mode: parseMode || 'Markdown'  // Use parseMode from request or default to Markdown
+    });
+
+    if (response.data && response.data.ok) {
+      console.log('Telegram API response:', response.data);
+      return res.json({ 
+        success: true, 
+        message: 'Posted to Telegram successfully' 
+      });
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Failed to post to Telegram', 
+        details: response.data 
+      });
+    }
+  } catch (error) {
+    console.error('Error posting to Telegram:', error.response?.data || error.message);
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Error posting to Telegram', 
+      details: error.response?.data || error.message 
+    });
   }
 });
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

@@ -48,45 +48,25 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       setIsPosting(true);
       setPostStatus('Posting to Telegram...');
 
-      // Determine the base URL based on environment
-      const baseUrl = window.location.origin;
-      // Try both API endpoints
-      const apiUrl = `${baseUrl}/api/post-to-telegram`;
-      const fallbackApiUrl = `${baseUrl}/post-to-telegram`;
+      // Use the correct API endpoint with the /api/post-to-telegram path
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://telegrampostmaker-production.up.railway.app/api/post-to-telegram'
+        : 'http://localhost:3001/api/post-to-telegram';
       
-      // Add console log for debugging
-      console.log(`Using API URL: ${apiUrl} (with fallback to ${fallbackApiUrl})`);
-      
-      // Prepare request options
-      const requestOptions = {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
         },
         body: JSON.stringify({
           message: generatedText,
           channelId: targetChannelId,
           parseMode: 'Markdown' // Explicitly set parse mode
         }),
-      };
-      
-      // Try the main API endpoint first
-      let response;
-      try {
-        response = await fetch(apiUrl, requestOptions);
-        console.log(`Main API response status: ${response.status}`);
-      } catch (mainApiError) {
-        console.error('Error with main API endpoint:', mainApiError);
-        console.log('Trying fallback API endpoint...');
-        response = await fetch(fallbackApiUrl, requestOptions);
-        console.log(`Fallback API response status: ${response.status}`);
-      }
+      });
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Error response: ${errorText}`);
         throw new Error(`Server responded with status: ${response.status}`);
       }
 
@@ -327,66 +307,35 @@ const TelegramPoster = ({ generatedText, result, generateDetailedJobListingsForC
       throw new Error('Message and channelId are required');
     }
     
-    // Determine the base URL dynamically based on current location
-    const baseUrl = window.location.origin;
+    // Use environment-based API URL with the correct endpoint
+    const apiBaseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://telegrampostmaker-production.up.railway.app'
+      : 'http://localhost:3001';
     
-    // Simplified endpoint handling - try only the most likely endpoints
-    const endpoints = [
-      `${baseUrl}/api/post-to-telegram`,
-      `${baseUrl}/post-to-telegram`
-    ];
+    const response = await fetch(`${apiBaseUrl}/api/post-to-telegram`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message,
+        channelId,
+        parseMode: 'Markdown' // Add parse mode
+      }),
+    });
     
-    console.log('Current origin:', baseUrl);
-    console.log('Will try these endpoints:', endpoints);
-    
-    let lastError = null;
-    
-    // Try each endpoint until one works
-    for (const endpoint of endpoints) {
-      try {
-        console.log(`Trying endpoint: ${endpoint}`);
-        
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            message,
-            channelId,
-            parseMode: 'Markdown'
-          }),
-        });
-        
-        // Log response details for debugging
-        console.log(`Response from ${endpoint}:`, response.status);
-        
-        // Check if response is ok before trying to parse JSON
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`Error from ${endpoint}:`, errorText);
-          lastError = new Error(`Server responded with status: ${response.status}`);
-          continue; // Try next endpoint
-        }
-        
-        const result = await response.json();
-        
-        if (!result.success) {
-          lastError = new Error(result.error || 'Failed to post message');
-          continue; // Try next endpoint
-        }
-        
-        return result; // Success! Return the result
-      } catch (error) {
-        console.error(`Error with endpoint ${endpoint}:`, error);
-        lastError = error;
-        // Continue to next endpoint
-      }
+    // Check if response is ok before trying to parse JSON
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
     }
     
-    // If we get here, all endpoints failed
-    throw lastError || new Error('Failed to post message to Telegram');
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to post message');
+    }
+    
+    return result;
   };
   
   // Helper function to group jobs by category
