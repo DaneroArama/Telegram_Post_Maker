@@ -2,6 +2,8 @@ import express from 'express';
 import axios from 'axios';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Initialize dotenv
 dotenv.config();
@@ -122,6 +124,15 @@ app.post('/', async (req, res) => {
       details: error.response?.data || error.message 
     });
   }
+});
+
+// Serve static files from the 'dist' directory
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Fallback: serve index.html for any non-API route
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) return; // Let API routes work as before
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 app.listen(PORT, () => {
